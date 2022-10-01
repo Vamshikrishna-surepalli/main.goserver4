@@ -1,0 +1,49 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+)
+
+type student struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Date  string `json:"date"`
+}
+
+var newStudents []student
+
+func homepage(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("called")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	fmt.Fprintf(w, "Homepage Endpoint Hit")
+}
+func createStudent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	var newStudent student
+	_ = json.NewDecoder(r.Body).Decode(&newStudent)
+	newStudents = append(newStudents, newStudent)
+	json.NewEncoder(w).Encode(newStudents)
+}
+
+func getStudent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	json.NewEncoder(w).Encode(newStudents)
+}
+
+func HandleRequests() {
+	http.HandleFunc("/", homepage)
+	http.HandleFunc("/createStudent", createStudent)
+	http.HandleFunc("/getStudent", getStudent)
+	log.Fatal(http.ListenAndServe(":8090", nil))
+}
+func main() {
+	HandleRequests()
+}
